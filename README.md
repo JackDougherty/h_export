@@ -1,11 +1,11 @@
 ## View and export Hypothesis annotations
 
-Use remotely:
+# my demo links
 
-- [user](http://jonudell.net/h/user.html?user=judell)
-- [group](http://jonudell.net/h/group.html)
-- [tag](http://jonudell.net/h/tag.html?tag=nextprez)
-- [any](http://jonudell.net/h/any.html)
+- [any](http://jackdougherty.github.io/h_export/any.html?any=ontheline)
+- [user](http://jackdougherty.github.io/h_export/user.html?user=jackdougherty)
+- [group](http://jackdougherty.github.io/h_export/group.html)
+- [tag](http://jackdougherty.github.io/h_export/tag.html?tag=nextprez)
 
 Or clone and use locally
 
