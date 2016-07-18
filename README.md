@@ -1,6 +1,6 @@
 ## View and export Hypothesis annotations
 
-# my demo links
+# Jack's demo links
 
 - [any](http://jackdougherty.github.io/h_export/any.html?any=ontheline)
 - [user](http://jackdougherty.github.io/h_export/user.html?user=jackdougherty)
