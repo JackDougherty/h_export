@@ -1,8 +1,11 @@
 var user = '';
+var url = '';
 var token = '';
 var tag = '';
 var group = '';
+var any = '';
 var query = 'https://hypothes.is/api/search?limit=200&offset=__OFFSET__&_separate_replies=true';
+var displayed_in_thread = [];
 
 function process(rows, replies) {
   var gathered = gather(rows);
@@ -58,7 +61,7 @@ function process_urls_html(element, gathered, replies) {
   }
 
 
-function process_thread_html(annos, id, level, replies, displayed_in_thread) {
+function process_thread_html(annos, id, level, replies) {
 	if ( displayed_in_thread.indexOf(id) == -1 ) {
 		var margin = level * 20
 		var anno = annos[id];
@@ -80,15 +83,17 @@ function process_thread_html(annos, id, level, replies, displayed_in_thread) {
 		};
 		html = filterXSS(html, options);
 		var tags = '';
-        if (anno.tags.length )
-			tags = '<div class="tags">' + 
+        if (anno.tags.length ) {
+          var links = anno.tags.map(function(x) { return '<a target="_tag" href="tag.html?tag=' + x.replace('#','') + '">' + x + '</a>' } )			
+		  tags = '<div class="tags">' + 
 					'<span class="tag-item">' + 
-					anno.tags.join('</span><span class="tag-item">') + 
+					links.join('</span><span class="tag-item">') + 
 					'</span></div>';
+		  }
 		var template = '<div style="padding:10px;margin-left:_MARGIN_px">' + 
 						'<span class="user"><a target="_user" href="user.html?user=' + anno['user'] + '">' + anno['user'] + '</a></span>' + ' ' + 
 						'<span class="timestamp">' + dt_str + '</span>' + 
-                        '<span style="font-size:smaller"><a target="_new" href="https://hyp.is/' + anno.id + '"> ' + anno.id + '</a></span>' + 
+                        '<span style="font-size:smaller"><a title="permalink" target="_new" href="https://hyp.is/' + anno.id + '"> # </a></span>' + 
 						'<div class="annotation-quote">'  + anno.quote + '</div>' + 
                         tags + 
 						'<div>'  + html + '</div>' + 
@@ -109,26 +114,29 @@ function process_thread_html(annos, id, level, replies, displayed_in_thread) {
 
 	if ( children.length ) {
 		for (var i=0; i<children.length; i++ )
-			process_thread_html(annos, children[i], level+1, replies, displayed_in_thread);
+			process_thread_html(annos, children[i], level+1, replies);
 		}
 }
 
 function load(offset, rows, replies) {
-	var limit = 2000;
+	var limit = 400;
     try { user = $('#user')[0].value; } catch (e) {}
 	try { token = $('#token')[0].value; } catch (e) {}
 	try	{ tag = $('#tag')[0].value; } catch (e) {}
 	try	{ group = $('#group')[0].value; } catch (e) {}
-    if ( ! user && ! token && ! tag && ! group )
-		limit = 200;
+	try	{ any = $('#any')[0].value; } catch (e) {}
+	try	{ url = $('#url')[0].value; } catch (e) {}
 	_query = query.replace('__OFFSET__',offset);
 	if ( tag )
 		_query += '&tags=' + tag;
-
 	if ( user )
 		_query += '&user=' + user;
 	if ( group  )
 		_query += '&group=' + group;
+	if ( any  )
+		_query += '&any=' + any;
+	if ( url  )
+		_query += '&uri=' + url;
 	$.ajax({
          url: _query,
          type: "GET",
@@ -165,8 +173,11 @@ function gather(rows) {
 		var id = annotation['id'];
 		annos[id] = annotation;                  // save it by id
 		var url = annotation['url'];             // remember these things
+		url = url.replace(/\/$/, "");            // strip trailing slash
 		var updated = annotation['updated'];     
 		var title = annotation['title'];
+		if (! title)
+			title = url;
         if ( url in urls ) {                     // add/update this url's info
             urls[url] += 1;
 			ids[url].push(id);
